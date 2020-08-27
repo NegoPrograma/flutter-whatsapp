@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "946784524658",
+    "firebase_url": "https://zapzap-ccca8.firebaseio.com",
+    "project_id": "zapzap-ccca8",
+    "storage_bucket": "zapzap-ccca8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:946784524658:android:1e83fa784a18cb4fd925eb",
+        "android_client_info": {
+          "package_name": "com.example.whatsapp_mockup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "946784524658-nja9eerk2nd65om35pco3amr0p9c2ai2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.whatsapp_mockup",
+            "certificate_hash": "16e94858f24757d48cec1705c1e4b33babc68ff6"
+          }
+        },
+        {
+          "client_id": "946784524658-0n3u9khmdgomc7h0b8g9c8htum457bip.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAg40RbQ_rz-CcymK-4IYeSRoNrC1nALnI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "946784524658-0n3u9khmdgomc7h0b8g9c8htum457bip.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
