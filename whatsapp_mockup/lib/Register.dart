@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:whatsapp_mockup/Home.dart';
+import 'package:whatsapp_mockup/Utils/RouteGenerator.dart';
+import 'Models/User.dart';
 
 class Register extends StatefulWidget {
   @override
@@ -11,7 +15,25 @@ class _RegisterState extends State<Register> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   String _resultMessage = "";
-  _validateFields() {
+
+  void _register(User user) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    auth
+        .createUserWithEmailAndPassword(
+            email: user.email, password: user.password)
+        .then((firebaseUser) {
+      Firestore db = Firestore.instance;
+      db.collection("users").document(firebaseUser.uid).setData(user.toMap());
+      Navigator.pushNamedAndRemoveUntil(context, RouteGenerator.HOME_ROUTE,(context)=> false);
+    }).catchError(
+      (onError) => setState(() {
+        _resultMessage =
+            "Erro ao cadastrar usuário. Verifique os dados e tente novamente.";
+      }),
+    );
+  }
+
+  void _validateFields() {
     String name = _nameController.text;
     String email = _emailController.text;
     String password = _passwordController.text;
@@ -20,6 +42,8 @@ class _RegisterState extends State<Register> {
       if (email.isNotEmpty && email.contains('@')) {
         if (password.isNotEmpty && password.length > 5) {
           _resultMessage = "Sucesso! Seja bem vindo(a) ao zapzap";
+          User newUser = User(name, email, password);
+          _register(newUser);
         } else {
           _resultMessage = "Senha deve possuir no mínimo 6 caracteres.\n";
         }
@@ -32,7 +56,6 @@ class _RegisterState extends State<Register> {
     setState(() {
       _resultMessage = _resultMessage;
     });
-    
   }
 
   @override
