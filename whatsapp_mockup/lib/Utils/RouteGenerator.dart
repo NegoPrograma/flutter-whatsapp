@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:whatsapp_mockup/Config.dart';
 import 'package:whatsapp_mockup/Home.dart';
 import 'package:whatsapp_mockup/Login.dart';
 import 'package:whatsapp_mockup/Register.dart';
@@ -8,6 +9,7 @@ class RouteGenerator {
   static const LOGIN_ROUTE = "/login";
   static const REGISTER_ROUTE = "/register";
   static const ROOT_ROUTE = "/";
+  static const CONFIG_ROUTE = "/config";
 
   static Route<dynamic> _routeError() {
     return MaterialPageRoute(
@@ -46,6 +48,12 @@ class RouteGenerator {
           builder: (context) => Home(),
         );
         break;
+      case CONFIG_ROUTE:
+        return MaterialPageRoute(
+          builder: (context) => Config(),
+        );
+        break;
+
       default:
         return _routeError();
     }

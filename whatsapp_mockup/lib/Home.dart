@@ -96,6 +96,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   void _getChosenOption(String chosenOption) {
     switch (chosenOption) {
       case "Configurações":
+        Navigator.pushNamed(this.context, RouteGenerator.CONFIG_ROUTE);
         break;
       case "Deslogar":
         _signOut();
@@ -105,7 +106,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   void _signOut() async {
     await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacementNamed(context, RouteGenerator.HOME_ROUTE);
+    Navigator.pushReplacementNamed(context, RouteGenerator.LOGIN_ROUTE);
   }
 
   @override
