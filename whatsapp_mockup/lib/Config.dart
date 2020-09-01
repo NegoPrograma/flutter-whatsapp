@@ -15,14 +15,15 @@ class _ConfigState extends State<Config> {
   TextEditingController _usernameController = TextEditingController();
   String userId = "", profilePicURL = "";
   File _image;
+  dynamic _profilePic;
   @override
   void initState() {
     super.initState();
     fillInitialValues();
   }
 
-  void fillInitialValues() async {
-    getUsername();
+  void fillInitialValues() {
+    getUserData();
   }
 
   Future _getImage(String imageSource) async {
@@ -51,7 +52,7 @@ class _ConfigState extends State<Config> {
     });
   }
 
-  void getUsername() {
+  void getUserData() {
     FirebaseAuth auth = FirebaseAuth.instance;
     Firestore db = Firestore.instance;
 
@@ -59,19 +60,32 @@ class _ConfigState extends State<Config> {
       DocumentSnapshot userData =
           await db.collection("users").document(user.uid).get();
       _usernameController.text = userData.data['name'];
+      print(userData.data['name']);
       userId = user.uid;
+      if (userData.data['ProfilePicURL'] != null) {
+        profilePicURL = userData.data['ProfilePicURL'];
+        _getProfilePic();
+      }
     }).catchError((onError) {
       print("Erro! $onError");
     });
   }
 
+  void _updateProfilePicURLonStorage(String url) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    Firestore db = Firestore.instance;
+
+    Map<String, dynamic> urlMap = {"ProfilePicURL": url};
+    db.collection("users").document(userId).updateData(urlMap);
+  }
+
   void getProfilePicURL(StorageTaskSnapshot snapshot) async {
     profilePicURL = await snapshot.ref.getDownloadURL();
-    
+    _updateProfilePicURLonStorage(profilePicURL);
     _getProfilePic();
   }
 
-  dynamic _profilePic = null;
+  
 
   dynamic _getProfilePic() {
     if (profilePicURL != null) {
