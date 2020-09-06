@@ -37,8 +37,8 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _checkUserSession();
-    _emailController.text = "teste@gmail.com";
-    _passwordController.text = "testes";
+    _emailController.text = "t@gmail.com";
+    _passwordController.text = "Tester";
   }
 
   void _validateFields() {

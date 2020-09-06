@@ -19,10 +19,6 @@ class _ConfigState extends State<Config> {
   @override
   void initState() {
     super.initState();
-    fillInitialValues();
-  }
-
-  void fillInitialValues() {
     getUserData();
   }
 
@@ -62,8 +58,8 @@ class _ConfigState extends State<Config> {
       _usernameController.text = userData.data['name'];
       print(userData.data['name']);
       userId = user.uid;
-      if (userData.data['ProfilePicURL'] != null) {
-        profilePicURL = userData.data['ProfilePicURL'];
+      if (userData.data['profilePicURL'] != null) {
+        profilePicURL = userData.data['profilePicURL'];
         _getProfilePic();
       }
     }).catchError((onError) {
@@ -72,11 +68,17 @@ class _ConfigState extends State<Config> {
   }
 
   void _updateProfilePicURLonStorage(String url) {
-    FirebaseAuth auth = FirebaseAuth.instance;
     Firestore db = Firestore.instance;
 
-    Map<String, dynamic> urlMap = {"ProfilePicURL": url};
+    Map<String, dynamic> urlMap = {"profilePicURL": url};
     db.collection("users").document(userId).updateData(urlMap);
+  }
+
+  void _updateUsername() {
+    Firestore db = Firestore.instance;
+
+    Map<String, dynamic> userNameJSON = {"name": _usernameController.text};
+    db.collection("users").document(userId).updateData(userNameJSON);
   }
 
   void getProfilePicURL(StorageTaskSnapshot snapshot) async {
@@ -84,8 +86,6 @@ class _ConfigState extends State<Config> {
     _updateProfilePicURLonStorage(profilePicURL);
     _getProfilePic();
   }
-
-  
 
   dynamic _getProfilePic() {
     if (profilePicURL != null) {
@@ -143,7 +143,9 @@ class _ConfigState extends State<Config> {
                   ),
                 ),
                 RaisedButton(
-                  onPressed: () {},
+                  onPressed: () =>{
+                    _updateUsername()
+                  },
                   child: Text(
                     "Salvar",
                     style: TextStyle(color: Colors.white),

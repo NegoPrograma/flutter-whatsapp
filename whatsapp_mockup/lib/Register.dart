@@ -11,9 +11,9 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _nameController = TextEditingController(text:"Tester");
+  TextEditingController _emailController = TextEditingController(text:"t@gmail.com");
+  TextEditingController _passwordController = TextEditingController(text:"Tester");
   String _resultMessage = "";
 
   void _register(User user) {
