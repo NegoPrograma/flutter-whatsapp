@@ -14,6 +14,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   List<Map> test;
   List<String> menuItens;
   FirebaseAuth auth;
+  String userId = "";
   @override
   void initState() {
     super.initState();
@@ -71,24 +72,24 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     List<Map> contactList = List<Map>();
 
     Firestore db = Firestore.instance;
-    String userId = "";
+    String userEmail = "";
     await auth.currentUser().then((user) async {
       DocumentSnapshot currentUser =
           await db.collection("users").document(user.uid).get();
-      userId = currentUser.data['email'];
-      print("\n\n\n\n\n\n\nUsuario atual: " +
-          currentUser.data["email"] +
-          "\n\n\n\n\n\n\n");
+      userId = user.uid;
+      userEmail = currentUser.data['email'];
     }).catchError(
       (onError) => print("\n\n\n\n\n\n\n erro $onError\n\n\n\n\n\n\n"),
     );
     QuerySnapshot allUsers = await db.collection("users").getDocuments();
 
     for (DocumentSnapshot user in allUsers.documents) {
-      print("$userId vs " + user.data['email']);
-      if (userId != user.data['email'])
-        contactList.add(
-            {"name": user.data["name"], "image": user.data["profilePicURL"]});
+      if (userEmail != user.data['email'])
+        contactList.add({
+          "name": user.data["name"],
+          "image": user.data["profilePicURL"],
+          "contactId": user.documentID,
+        });
     }
     return contactList;
   }
@@ -107,7 +108,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   Navigator.pushNamed(context, RouteGenerator.MESSAGES_ROUTE,
                       arguments: {
                         "contactName": contacts[index]['name'],
-                        "profilePicURL": contacts[index]['image']
+                        "profilePicURL": contacts[index]['image'],
+                        "userId": userId,
+                        "contactId": contacts[index]['contactId'],
                       });
                 },
                 contentPadding: EdgeInsets.fromLTRB(

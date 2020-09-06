@@ -8,67 +8,148 @@ import 'package:whatsapp_mockup/Utils/RouteGenerator.dart';
 class Messages extends StatefulWidget {
   String _contactName = "New User";
   String _profilePicURL = "";
+  String _userId = "";
+  String _contactId = "";
+
   Messages(contact) {
     _contactName = contact["contactName"];
     _profilePicURL = contact["profilePicURL"];
+    _userId = contact['userId'];
+    _contactId = contact['contactId'];
+    print(_contactId);
   }
   @override
   _MessagesState createState() => _MessagesState();
 }
 
 class _MessagesState extends State<Messages> {
-  TextEditingController _emailController = TextEditingController();
-  void _sendMessage() {}
+  TextEditingController _messageController = TextEditingController();
+  StreamBuilder messageStream;
+  Firestore db = Firestore.instance;
+  void _sendMessage() {
+    String message = _messageController.text;
+
+    if (message.isNotEmpty) {
+      Map<String, dynamic> messageJSON = {
+        "userId": widget._userId,
+        'message': message,
+        "imageURL": "",
+        "type": "text"
+      };
+
+      _storeMessage(widget._userId, widget._contactId, messageJSON);
+      _storeMessage(widget._contactId,widget._userId, messageJSON);
+    }
+  }
+
+  void _storeMessage(
+      String senderId, String receiverId, Map<String, dynamic> message) async {
+    /**
+     * Estrutura:
+     * 
+     * messages->id de quem mandou -> uma mesma pessoa pode ter mandado
+     * para varias outras, então não adianta só colocar quem recebeu depois,
+     * façamos então uma segunda collection:
+     * 
+     * messages->id de quem mandou -> collection representando quem recebeu
+     * ->conjunto de mensagens.
+     */
+    await db
+        .collection("messages")
+        .document(senderId)
+        .collection(receiverId)
+        .add(message);
+
+    _messageController.clear();
+  }
+
   void _sendPhoto() {}
 
   Widget messageInputField;
-  Widget messageListView;
   List<String> messageTest = [
     "EAE",
     "QUAL FOI",
     "BOA NOITE NEY JOGOU O QUE SABE",
     "vlw lek"
   ];
+  Stream _recoverMessages() {
+    return db
+        .collection("messages")
+        .document(widget._userId)
+        .collection(widget._contactId).orderBy()
+        .snapshots();
+  }
+
   void initState() {
     super.initState();
 
-    messageListView = Expanded(
-      child: ListView.builder(
-          itemCount: messageTest.length,
-          itemBuilder: (context, index) {
-            Alignment align = Alignment.centerRight;
-            Color messageColor = Colors.greenAccent;
-            if (index.isEven) {
-              align = Alignment.centerLeft;
-              messageColor = Colors.white;
-            }
-
-            //deixando as imagens com 80% do espaço da tela
-            double containerWidth = MediaQuery.of(context).size.width*80/100;
-
-            
-            return Align(
-              alignment: align,
-              child: Padding(
-                padding: EdgeInsets.all(6),
-                child: Container(
-                  width: containerWidth,
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: messageColor,
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    messageTest[index],
-                    style: TextStyle(fontSize: 18),
-                  ),
+    messageStream = StreamBuilder(
+        stream: _recoverMessages(),
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              Center(
+                child: Column(
+                  children: [
+                    Text("Carregando mensagens"),
+                    CircularProgressIndicator()
+                  ],
                 ),
-              ),
-            );
-          }),
-    );
+              );
+              break;
+            case ConnectionState.active:
+            case ConnectionState.done:
+              QuerySnapshot qs = snapshot.data;
+              if (snapshot.hasError) {
+                return Expanded(
+                  child: Text("Erro ao carregar dados"),
+                );
+              } else {
+                return Expanded(
+                  child: ListView.builder(
+                      itemCount: qs.documents.length,
+                      itemBuilder: (context, index) {
+                        Map<String, dynamic> message = qs.documents[index].data;
+                        Alignment align = Alignment.centerLeft;
+                        Color messageColor = Colors.white;
+                        if (message['userId'] == widget._userId) {
+                          align = Alignment.centerRight;
+                          messageColor = Colors.greenAccent;
+                        }
+
+                        //deixando as imagens com 80% do espaço da tela
+                        double containerWidth =
+                            MediaQuery.of(context).size.width * 0.8;
+
+                        return Align(
+                          alignment: align,
+                          child: Padding(
+                            padding: EdgeInsets.all(6),
+                            child: Container(
+                              width: containerWidth,
+                              padding: EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: messageColor,
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                message['message'],
+                                style: TextStyle(fontSize: 18),
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                );
+              }
+              break;
+          }
+          return Container();
+        });
+   
     messageInputField = Container(
         padding: EdgeInsets.all(8),
         child: Row(
@@ -77,7 +158,7 @@ class _MessagesState extends State<Messages> {
               child: Padding(
                 padding: EdgeInsets.only(right: 8),
                 child: TextField(
-                  controller: _emailController,
+                  controller: _messageController,
                   autofocus: true,
                   keyboardType: TextInputType.emailAddress,
                   style: TextStyle(fontSize: 20),
@@ -115,7 +196,16 @@ class _MessagesState extends State<Messages> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget._contactName),
+        title: Row(children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(0, 8, 10, 8),
+            child: CircleAvatar(
+              maxRadius: 20,
+              backgroundImage: NetworkImage(widget._profilePicURL),
+            ),
+          ),
+          Text(widget._contactName),
+        ]),
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
@@ -130,7 +220,7 @@ class _MessagesState extends State<Messages> {
             padding: EdgeInsets.all(16),
             child: Column(
               children: [
-                messageListView,
+                messageStream,
                 messageInputField,
               ],
             ),
