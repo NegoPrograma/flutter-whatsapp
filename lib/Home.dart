@@ -5,9 +5,6 @@ import 'package:whatsapp_mockup/Utils/RouteGenerator.dart';
 
 class Home extends StatefulWidget {
   Home();
-  String _email = "";
-
-  Home.verify(this._email);
   @override
   _HomeState createState() => _HomeState();
 }
@@ -106,6 +103,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             itemCount: contacts.length,
             itemBuilder: (context, index) {
               return ListTile(
+                onTap: () {
+                  Navigator.pushNamed(context, RouteGenerator.MESSAGES_ROUTE,
+                      arguments: {
+                        "contactName": contacts[index]['name'],
+                        "profilePicURL": contacts[index]['image']
+                      });
+                },
                 contentPadding: EdgeInsets.fromLTRB(
                   16,
                   8,

@@ -1,2 +1,5 @@
-# flutter-whatsapp
-A whatsapp mock-up made mainly with Flutter and Firebase.
+# whatsapp_mockup
+
+A flutter project simulating a one on one chat with whatsapp interface.
+
+
